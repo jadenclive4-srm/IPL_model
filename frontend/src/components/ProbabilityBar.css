@@ -1,0 +1,132 @@
+.probability-container {
+  background: linear-gradient(145deg, #1a2d52 0%, #0A1F44 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.1);
+}
+
+.probability-header h3 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.probability-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.team-probability {
+  width: 100%;
+}
+
+.team-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.team-info .team-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.team-info .team-percentage {
+  color: #FF6B00;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.team-1-fill {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+}
+
+.team-2-fill {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.progress-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.probability-insights {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #8a9bb8;
+  font-size: 0.9rem;
+}
+
+.insight-icon {
+  font-size: 1.1rem;
+}
+
+.insight-text {
+  color: #FF6B00;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .probability-container {
+    padding: 1rem;
+  }
+  
+  .team-info .team-name {
+    font-size: 0.9rem;
+  }
+  
+  .team-info .team-percentage {
+    font-size: 1rem;
+  }
+}

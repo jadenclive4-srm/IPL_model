@@ -1,0 +1,132 @@
+.team-stats-card {
+  background: linear-gradient(145deg, #1a2d52 0%, #0A1F44 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.team-stats-card:hover {
+  border-color: rgba(255, 107, 0, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(255, 107, 0, 0.15);
+}
+
+.stats-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-logo {
+  font-size: 2.5rem;
+}
+
+.team-title {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-value.wins {
+  color: #4ade80;
+}
+
+.stat-value.losses {
+  color: #f87171;
+}
+
+.stat-value.win-rate {
+  color: #FF6B00;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #8a9bb8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.recent-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-label {
+  display: block;
+  color: #8a9bb8;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-results {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.form-item {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.form-item:hover {
+  transform: scale(1.1);
+}
+
+.form-item.w {
+  background: rgba(74, 222, 128, 0.15);
+}
+
+.form-item.l {
+  background: rgba(248, 113, 113, 0.15);
+}
+
+@media (max-width: 480px) {
+  .team-stats-card {
+    padding: 1rem;
+  }
+  
+  .stats-grid {
+    gap: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+}
