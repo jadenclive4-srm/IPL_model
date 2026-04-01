@@ -5,6 +5,70 @@ import TeamStatsCard from '../components/TeamStatsCard';
 import PlayerCard from '../components/PlayerCard';
 import './MatchDetails.css';
 
+// 5 Questions for the current match
+const mockQuestions = [
+  {
+    id: 1,
+    matchId: 1,
+    questionText: 'Who will win the match?',
+    optionA: 'Mumbai Indians',
+    optionB: 'Chennai Super Kings',
+    optionC: null,
+    optionD: null,
+    correctOption: null,
+    pointsValue: 10,
+    questionType: 'WINNER'
+  },
+  {
+    id: 2,
+    matchId: 1,
+    questionText: 'How many runs will the winning team score?',
+    optionA: 'Below 150',
+    optionB: '150-170',
+    optionC: '170-190',
+    optionD: 'Above 190',
+    correctOption: null,
+    pointsValue: 10,
+    questionType: 'SCORE_RANGE'
+  },
+  {
+    id: 3,
+    matchId: 1,
+    questionText: 'Which player will score the most runs?',
+    optionA: 'Rohit Sharma',
+    optionB: 'Surya Kumar Yadav',
+    optionC: 'MS Dhoni',
+    optionD: 'Ruturaj Gaikwad',
+    correctOption: null,
+    pointsValue: 10,
+    questionType: 'TOP_SCORER'
+  },
+  {
+    id: 4,
+    matchId: 1,
+    questionText: 'How many wickets will fall in the match?',
+    optionA: 'Below 5',
+    optionB: '5-7',
+    optionC: '8-10',
+    optionD: 'Above 10',
+    correctOption: null,
+    pointsValue: 10,
+    questionType: 'WICKETS'
+  },
+  {
+    id: 5,
+    matchId: 1,
+    questionText: 'Which bowler will take the most wickets?',
+    optionA: 'Jasprit Bumrah',
+    optionB: 'Ravindra Jadeja',
+    optionC: 'Other',
+    optionD: 'No wickets',
+    correctOption: null,
+    pointsValue: 10,
+    questionType: 'TOP_BOWLER'
+  }
+];
+
 // Mock data
 const mockMatchDetails = {
   id: 1,
@@ -51,8 +115,62 @@ const mockMatchDetails = {
 
 const MatchDetails = () => {
   const { id } = useParams();
-  const [match, setMatch] = useState(mockMatchDetails);
+  const [match] = useState(mockMatchDetails);
   const [activeTab, setActiveTab] = useState('headtohead');
+  const [questions] = useState(mockQuestions);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+
+  const handleAnswerSelect = (questionId, answer) => {
+    setSelectedAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const unanswered = questions.filter(q => !selectedAnswers[q.id]);
+    if (unanswered.length > 0) {
+      setSubmitMessage('Please answer all questions before submitting.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage('');
+
+    // Prepare the data to send
+    const userId = localStorage.getItem('userId') || 'guest'; // Assuming user ID is stored
+    const answersData = questions.map(question => ({
+      userId,
+      questionId: question.id,
+      selectedOption: selectedAnswers[question.id],
+      answeredAt: Date.now()
+    }));
+
+    try {
+      // Send to MongoDB via API
+      const response = await fetch('http://localhost:3001/api/submit-answers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ answers: answersData })
+      });
+
+      if (response.ok) {
+        setSubmitMessage('Answers submitted successfully!');
+        // Clear selections or redirect
+      } else {
+        setSubmitMessage('Failed to submit answers. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting answers:', error);
+      setSubmitMessage('Error submitting answers. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     // In real app, fetch match details from API
@@ -97,7 +215,82 @@ const MatchDetails = () => {
           </div>
         </div>
         
-        {/* Stats Tabs */}
+        {/* Predict & Earn Bonus Points Card */}
+        <div className="bonus-points-card">
+          <div className="bonus-card-content">
+            <div className="bonus-icon">🎁</div>
+            <div className="bonus-text">
+              <h3>Predict & Earn Bonus Points</h3>
+              <p>Make your predictions and win exciting bonus points!</p>
+            </div>
+          </div>
+         </div>
+
+         {/* Quiz Questions Section */}
+         <div className="match-questions-section">
+           <h3 className="quiz-title">Predict & Earn Bonus Points!</h3>
+           <div className="questions-grid">
+             {questions.map((question, index) => (
+               <div key={question.id} className="question-card">
+                 <div className="question-number">Q{index + 1}</div>
+                 <div className="question-content">
+                   <p className="question-text">{question.questionText}</p>
+                   <div className="question-options">
+                     {question.optionA && (
+                       <button
+                         className={`option-btn ${selectedAnswers[question.id] === 'A' ? 'selected' : ''}`}
+                         onClick={() => handleAnswerSelect(question.id, 'A')}
+                       >
+                         {question.optionA}
+                       </button>
+                     )}
+                     {question.optionB && (
+                       <button
+                         className={`option-btn ${selectedAnswers[question.id] === 'B' ? 'selected' : ''}`}
+                         onClick={() => handleAnswerSelect(question.id, 'B')}
+                       >
+                         {question.optionB}
+                       </button>
+                     )}
+                     {question.optionC && (
+                       <button
+                         className={`option-btn ${selectedAnswers[question.id] === 'C' ? 'selected' : ''}`}
+                         onClick={() => handleAnswerSelect(question.id, 'C')}
+                       >
+                         {question.optionC}
+                       </button>
+                     )}
+                     {question.optionD && (
+                       <button
+                         className={`option-btn ${selectedAnswers[question.id] === 'D' ? 'selected' : ''}`}
+                         onClick={() => handleAnswerSelect(question.id, 'D')}
+                       >
+                         {question.optionD}
+                       </button>
+                     )}
+                   </div>
+                   <span className="points-badge">{question.pointsValue} pts</span>
+                 </div>
+               </div>
+             ))}
+           </div>
+         </div>
+
+         {/* Submit Button */}
+         <div className="submit-section">
+           <button
+             className="submit-answers-btn"
+             onClick={handleSubmit}
+             disabled={isSubmitting}
+           >
+             {isSubmitting ? 'Submitting...' : 'Submit Answers'}
+           </button>
+           {submitMessage && (
+             <p className="submit-message">{submitMessage}</p>
+           )}
+         </div>
+
+         {/* Stats Tabs */}
         <div className="stats-tabs">
           <button 
             className={`tab-btn ${activeTab === 'headtohead' ? 'active' : ''}`}

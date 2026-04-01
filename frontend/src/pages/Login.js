@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import './Login.css';
 
 const Login = () => {
@@ -29,8 +28,24 @@ const Login = () => {
         setError('Please fill in all fields');
         return;
       }
-      // Login logic here
-      console.log('Login:', formData);
+      // Dummy credentials for testing (no backend needed)
+      const validUsers = [
+        { username: 'admin', password: 'password123' },
+        { username: 'user1', password: 'password123' },
+        { username: 'user2', password: 'password123' },
+        { username: 'test', password: 'test123' }
+      ];
+      
+      const isValidUser = validUsers.some(
+        user => user.username === formData.username && user.password === formData.password
+      );
+      
+      if (isValidUser) {
+        // Simulate successful login - redirect to dashboard
+        window.location.href = '/';
+      } else {
+        setError('Invalid credentials. Try: admin / password123');
+      }
     } else {
       if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
         setError('Please fill in all fields');
@@ -47,8 +62,6 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <Navbar />
-      
       <div className="login-container">
         <div className="login-card">
           <div className="login-header">

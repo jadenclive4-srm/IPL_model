@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import MatchCard from '../components/MatchCard';
 import './Dashboard.css';
@@ -55,9 +55,9 @@ const mockUpcomingMatches = [
 ];
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(mockStats);
-  const [todayMatch, setTodayMatch] = useState(mockTodayMatch);
-  const [upcomingMatches, setUpcomingMatches] = useState(mockUpcomingMatches);
+  const [stats] = useState(mockStats);
+  const [todayMatch] = useState(mockTodayMatch);
+  const [upcomingMatches] = useState(mockUpcomingMatches);
 
   return (
     <div className="dashboard">
@@ -101,8 +101,8 @@ const Dashboard = () => {
             match={todayMatch} 
             isToday={true}
             showPredictButton={true}
-          />
-        </section>
+           />
+         </section>
         
         {/* Upcoming Matches Section */}
         <section className="upcoming-section">

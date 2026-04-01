@@ -11,6 +11,7 @@
   width: 100%;
   max-width: 450px;
   position: relative;
+  margin: auto;
 }
 
 .login-card {

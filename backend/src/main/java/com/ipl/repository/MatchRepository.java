@@ -1,0 +1,32 @@
+package com.ipl.repository;
+
+import com.ipl.model.Match;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface MatchRepository extends JpaRepository<Match, Long> {
+    
+    @Query("SELECT m FROM Match m WHERE m.matchDate >= :currentTime ORDER BY m.matchDate ASC")
+    List<Match> findUpcomingMatches(Long currentTime);
+    
+    @Query("SELECT m FROM Match m WHERE m.matchDate < :currentTime ORDER BY m.matchDate DESC")
+    List<Match> findCompletedMatches(Long currentTime);
+    
+    @Query("SELECT m FROM Match m WHERE m.matchDate >= :startTime AND m.matchDate <= :endTime ORDER BY m.matchDate ASC")
+    List<Match> findMatchesByDateRange(Long startTime, Long endTime);
+    
+    @Query("SELECT m FROM Match m WHERE m.homeTeam.id = :teamId OR m.awayTeam.id = :teamId ORDER BY m.matchDate DESC")
+    List<Match> findMatchesByTeam(Long teamId);
+    
+    Optional<Match> findByMatchNumber(Integer matchNumber);
+    
+    @Query("SELECT m FROM Match m WHERE m.matchDate >= :currentTime ORDER BY m.matchDate ASC LIMIT 1")
+    Optional<Match> findNextMatch(Long currentTime);
+    
+    @Query("SELECT COUNT(m) FROM Match m WHERE m.matchStatus = :status")
+    Long countByMatchStatus(String status);
+}
