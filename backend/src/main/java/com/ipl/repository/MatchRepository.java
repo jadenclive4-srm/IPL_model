@@ -9,7 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    
+
+    @Query("SELECT m FROM Match m ORDER BY m.matchNumber ASC")
+    List<Match> findAllOrderedByMatchNumber();
+
     @Query("SELECT m FROM Match m WHERE m.matchDate >= :currentTime ORDER BY m.matchDate ASC")
     List<Match> findUpcomingMatches(Long currentTime);
     
@@ -26,6 +29,9 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     
     @Query("SELECT m FROM Match m WHERE m.matchDate >= :currentTime ORDER BY m.matchDate ASC LIMIT 1")
     Optional<Match> findNextMatch(Long currentTime);
+    
+    @Query("SELECT m FROM Match m WHERE m.matchDate >= :startOfDay AND m.matchDate < :endOfDay ORDER BY m.matchDate ASC")
+    List<Match> findMatchesForToday(Long startOfDay, Long endOfDay);
     
     @Query("SELECT COUNT(m) FROM Match m WHERE m.matchStatus = :status")
     Long countByMatchStatus(String status);

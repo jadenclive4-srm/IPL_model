@@ -6,6 +6,7 @@ import PredictionPage from './pages/PredictionPage';
 import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import MatchHistory from './pages/MatchHistory';
+import Admin from './pages/Admin';
 import './App.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/match-history" element={<MatchHistory />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
     </Router>

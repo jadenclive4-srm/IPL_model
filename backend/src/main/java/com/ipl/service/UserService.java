@@ -3,6 +3,10 @@ package com.ipl.service;
 import com.ipl.model.User;
 import com.ipl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,13 +15,13 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     
     @Transactional
-    public User registerUser(String username, String email, String password, String fullName) {
+    public User registerUser(String username, String email, String password, String fullName, String role) {
         if (userRepository.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");
         }
@@ -32,7 +36,7 @@ public class UserService {
         user.setFullName(fullName);
         user.setPoints(0);
         user.setRank(0);
-        user.setRole("USER");
+        user.setRole(role);
         user.setIsActive(true);
         user.setCreatedAt(System.currentTimeMillis());
         
@@ -46,7 +50,13 @@ public class UserService {
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
-    
+     
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
+     
     public List<User> getLeaderboard() {
         return userRepository.findAllByOrderByPointsDesc();
     }

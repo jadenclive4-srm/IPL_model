@@ -9,6 +9,8 @@ import com.ipl.repository.PredictionRepository;
 import com.ipl.repository.TeamRepository;
 import com.ipl.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -22,7 +24,9 @@ public class PredictionService {
     private final MatchRepository matchRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
+    @Autowired
+    @Lazy
+    private UserService userService;
     
     @Transactional
     public Prediction createPrediction(Long userId, Long matchId, Long predictedWinnerId, Integer homeProbability, Integer awayProbability) {

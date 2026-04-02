@@ -48,6 +48,16 @@ public class MatchController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(matches);
     }
+
+    @PostMapping("/import")
+    public ResponseEntity<String> importMatches() {
+        try {
+            matchService.importMatchesFromExcel("..\\data\\matches.csv");
+            return ResponseEntity.ok("Matches imported successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to import matches: " + e.getMessage());
+        }
+    }
     
     @GetMapping("/completed")
     public ResponseEntity<List<MatchDTO>> getCompletedMatches() {

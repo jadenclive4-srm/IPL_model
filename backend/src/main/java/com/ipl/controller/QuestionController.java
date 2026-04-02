@@ -33,13 +33,26 @@ public class QuestionController {
     }
     
     @PostMapping("/answers/batch")
-    public ResponseEntity<List<UserAnswerDTO>> submitAnswers(
-            @RequestParam Long userId,
-            @RequestParam Long matchId,
-            @RequestBody List<String> answers,
-            @RequestBody List<Long> questionIds) {
-        List<UserAnswerDTO> result = questionService.submitAnswers(userId, matchId, answers, questionIds);
+    public ResponseEntity<List<UserAnswerDTO>> submitAnswers(@RequestBody BatchAnswerRequest request) {
+        List<UserAnswerDTO> result = questionService.submitAnswers(request.getUserId(), request.getMatchId(), request.getAnswers(), request.getQuestionIds());
         return ResponseEntity.ok(result);
+    }
+    
+    // Inner class for batch answer request
+    public static class BatchAnswerRequest {
+        private Long userId;
+        private Long matchId;
+        private List<String> answers;
+        private List<Long> questionIds;
+        
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
+        public Long getMatchId() { return matchId; }
+        public void setMatchId(Long matchId) { this.matchId = matchId; }
+        public List<String> getAnswers() { return answers; }
+        public void setAnswers(List<String> answers) { this.answers = answers; }
+        public List<Long> getQuestionIds() { return questionIds; }
+        public void setQuestionIds(List<Long> questionIds) { this.questionIds = questionIds; }
     }
     
     @GetMapping("/user/match/{matchId}")

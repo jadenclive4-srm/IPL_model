@@ -41,7 +41,7 @@ public class Team {
     private Integer matchesLost = 0;
     
     @Column(nullable = false)
-    private Integer nrr = 0;
+    private Double netRunRate = 0.0;
     
     @Column(nullable = false)
     private Integer points = 0;

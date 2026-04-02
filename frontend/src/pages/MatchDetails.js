@@ -140,22 +140,26 @@ const MatchDetails = () => {
     setSubmitMessage('');
 
     // Prepare the data to send
-    const userId = localStorage.getItem('userId') || 'guest'; // Assuming user ID is stored
+    const userId = localStorage.getItem('userId') || '1'; // Default to user ID 1 for guest
     const answersData = questions.map(question => ({
-      userId,
       questionId: question.id,
       selectedOption: selectedAnswers[question.id],
       answeredAt: Date.now()
     }));
 
     try {
-      // Send to MongoDB via API
-      const response = await fetch('http://localhost:3001/api/submit-answers', {
+      // Send to Java backend API
+      const response = await fetch('http://localhost:8080/api/questions/answers/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ answers: answersData })
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          matchId: parseInt(id),
+          answers: answersData.map(a => a.selectedOption),
+          questionIds: answersData.map(a => a.questionId)
+        })
       });
 
       if (response.ok) {

@@ -41,6 +41,10 @@ const Login = () => {
       );
       
       if (isValidUser) {
+        // Store user info
+        const role = formData.username === 'admin' ? 'ADMIN' : 'USER';
+        localStorage.setItem('username', formData.username);
+        localStorage.setItem('role', role);
         // Simulate successful login - redirect to dashboard
         window.location.href = '/';
       } else {

@@ -19,6 +19,6 @@ public class TeamDTO {
     private Integer matchesPlayed;
     private Integer matchesWon;
     private Integer matchesLost;
-    private Integer nrr;
+    private Double netRunRate;
     private Integer points;
 }

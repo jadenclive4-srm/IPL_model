@@ -1,68 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import MatchCard from '../components/MatchCard';
 import './Dashboard.css';
 
-// Mock data for demonstration
-const mockStats = {
-  accuracy: 72,
-  totalMatches: 48,
-  wins: 35
+// Team logos mapping
+const teamLogos = {
+  'Royal Challengers Bangalore': '🔴',
+  'Sunrisers Hyderabad': '🟠',
+  'Mumbai Indians': '🔵',
+  'Kolkata Knight Riders': '🟣',
+  'Rajasthan Royals': '🟡',
+  'Chennai Super Kings': '🟡',
+  'Punjab Kings': '🟠',
+  'Gujarat Titans': '🔵',
+  'Lucknow Super Giants': '🟢',
+  'Delhi Capitals': '🔵'
 };
 
-const mockTodayMatch = {
-  id: 1,
-  team1: 'Mumbai Indians',
-  team2: 'Chennai Super Kings',
-  team1Logo: '🔵',
-  team2Logo: '🟡',
-  date: new Date().toISOString(),
-  venue: 'Wankhede Stadium, Mumbai',
-  status: 'Upcoming'
+// Function to transform API match data to frontend format
+const transformMatch = (matchDTO) => {
+  return {
+    id: matchDTO.id,
+    team1: matchDTO.homeTeamName,
+    team2: matchDTO.awayTeamName,
+    team1Logo: teamLogos[matchDTO.homeTeamName] || '🇮🇳',
+    team2Logo: teamLogos[matchDTO.awayTeamName] || '🇮🇳',
+    date: new Date(matchDTO.matchDate).toISOString(),
+    venue: matchDTO.venue,
+    status: matchDTO.matchStatus === 'SCHEDULED' ? 'Upcoming' : matchDTO.matchStatus,
+    winner: matchDTO.winnerTeamName
+  };
 };
-
-const mockUpcomingMatches = [
-  {
-    id: 2,
-    team1: 'Royal Challengers Bangalore',
-    team2: 'Kolkata Knight Riders',
-    team1Logo: '🔴',
-    team2Logo: '🟣',
-    date: new Date(Date.now() + 86400000).toISOString(),
-    venue: 'M. Chinnaswamy Stadium, Bangalore',
-    status: 'Upcoming'
-  },
-  {
-    id: 3,
-    team1: 'Delhi Capitals',
-    team2: 'Punjab Kings',
-    team1Logo: '🔵',
-    team2Logo: '🟠',
-    date: new Date(Date.now() + 172800000).toISOString(),
-    venue: 'Arun Jaitley Stadium, Delhi',
-    status: 'Upcoming'
-  },
-  {
-    id: 4,
-    team1: 'Sunrisers Hyderabad',
-    team2: 'Rajasthan Royals',
-    team1Logo: '🟠',
-    team2Logo: '🟡',
-    date: new Date(Date.now() + 259200000).toISOString(),
-    venue: 'Rajiv Gandhi International Cricket Stadium',
-    status: 'Upcoming'
-  }
-];
 
 const Dashboard = () => {
-  const [stats] = useState(mockStats);
-  const [todayMatch] = useState(mockTodayMatch);
-  const [upcomingMatches] = useState(mockUpcomingMatches);
+  const [stats] = useState({
+    accuracy: 72,
+    totalMatches: 48,
+    wins: 35
+  });
+  const [todayMatch, setTodayMatch] = useState(null);
+  const [upcomingMatches, setUpcomingMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log('Fetching today match...');
+        // Fetch today's match
+        const todayResponse = await fetch('http://localhost:8080/api/matches/today');
+        console.log('Today response:', todayResponse.status);
+        if (todayResponse.ok) {
+          const todayData = await todayResponse.json();
+          console.log('Today data:', todayData);
+          setTodayMatch(transformMatch(todayData));
+        } else {
+          setTodayMatch(null);
+        }
+
+        console.log('Fetching upcoming matches...');
+        // Fetch upcoming matches
+        const upcomingResponse = await fetch('http://localhost:8080/api/matches/upcoming');
+        console.log('Upcoming response:', upcomingResponse.status);
+        if (upcomingResponse.ok) {
+          const upcomingData = await upcomingResponse.json();
+          console.log('Upcoming data:', upcomingData);
+          setUpcomingMatches(upcomingData.map(transformMatch));
+        } else {
+          setUpcomingMatches([]);
+        }
+      } catch (err) {
+        setError('Failed to load match data');
+        console.error('Error fetching match data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <Navbar />
+        <div className="dashboard-container">
+          <div className="loading">Loading match data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard">
+        <Navbar />
+        <div className="dashboard-container">
+          <div className="error">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
       <Navbar />
-      
+
       <div className="dashboard-container">
         {/* Stats Cards Section */}
         <section className="stats-section">
@@ -73,7 +119,7 @@ const Dashboard = () => {
               <span className="stat-label">Prediction Accuracy</span>
             </div>
           </div>
-          
+
           <div className="stat-card">
             <div className="stat-icon">🏏</div>
             <div className="stat-content">
@@ -81,7 +127,7 @@ const Dashboard = () => {
               <span className="stat-label">Total Matches</span>
             </div>
           </div>
-          
+
           <div className="stat-card">
             <div className="stat-icon">🏆</div>
             <div className="stat-content">
@@ -90,19 +136,21 @@ const Dashboard = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Today's Match Section */}
-        <section className="today-match-section">
-          <h2 className="section-title">
-            <span className="title-icon">⚡</span>
-            Today's Match
-          </h2>
-          <MatchCard 
-            match={todayMatch} 
-            isToday={true}
-            showPredictButton={true}
-           />
-         </section>
+        {todayMatch && (
+          <section className="today-match-section">
+            <h2 className="section-title">
+              <span className="title-icon">⚡</span>
+              Today's Match
+            </h2>
+            <MatchCard
+              match={todayMatch}
+              isToday={true}
+              showPredictButton={true}
+             />
+          </section>
+        )}
         
         {/* Upcoming Matches Section */}
         <section className="upcoming-section">

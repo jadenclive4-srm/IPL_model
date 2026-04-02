@@ -70,7 +70,7 @@ public class TeamController {
         dto.setMatchesPlayed(team.getMatchesPlayed());
         dto.setMatchesWon(team.getMatchesWon());
         dto.setMatchesLost(team.getMatchesLost());
-        dto.setNrr(team.getNrr());
+        dto.setNetRunRate(team.getNetRunRate());
         dto.setPoints(team.getPoints());
         return dto;
     }

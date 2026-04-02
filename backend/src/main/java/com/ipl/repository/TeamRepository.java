@@ -21,6 +21,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("SELECT t FROM Team t ORDER BY t.points DESC")
     List<Team> findAllByOrderByPointsDesc();
     
-    @Query("SELECT t FROM Team t ORDER BY t.nrr DESC")
-    List<Team> findAllByOrderByNrrDesc();
+    @Query("SELECT t FROM Team t ORDER BY t.netRunRate DESC")
+    List<Team> findAllByOrderByNetRunRateDesc();
 }

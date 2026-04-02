@@ -48,7 +48,7 @@ public class TeamService {
         team.setMatchesPlayed(0);
         team.setMatchesWon(0);
         team.setMatchesLost(0);
-        team.setNrr(0);
+        team.setNetRunRate(0.0);
         team.setPoints(0);
         
         return teamRepository.save(team);
@@ -76,11 +76,11 @@ public class TeamService {
     }
     
     @Transactional
-    public Team updateNetRunRate(Long teamId, int nrrChange) {
+    public Team updateNetRunRate(Long teamId, double nrrChange) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
         
-        team.setNrr(team.getNrr() + nrrChange);
+        team.setNetRunRate(team.getNetRunRate() + nrrChange);
         return teamRepository.save(team);
     }
     
