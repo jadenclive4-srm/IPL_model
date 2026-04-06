@@ -4,38 +4,67 @@ import Navbar from '../components/Navbar';
 import ProbabilityBar from '../components/ProbabilityBar';
 import './PredictionPage.css';
 
-// Mock data
-const mockMatch = {
-  id: 1,
-  team1: 'Mumbai Indians',
-  team2: 'Chennai Super Kings',
-  team1Logo: '🔵',
-  team2Logo: '🟡',
-  venue: 'Wankhede Stadium, Mumbai',
-  date: new Date().toISOString()
+const teamLogos = {
+  'Royal Challengers Bangalore': '🔴',
+  'Sunrisers Hyderabad': '🟠',
+  'Mumbai Indians': '🔵',
+  'Kolkata Knight Riders': '🟣',
+  'Rajasthan Royals': '🟡',
+  'Chennai Super Kings': '🟡',
+  'Punjab Kings': '🔴',
+  'Gujarat Titans': '⚫',
+  'Lucknow Super Giants': '🟢',
+  'Delhi Capitals': '🔴'
 };
-
-const mockProbabilities = {
-  team1: 65,
-  team2: 35
-};
-
-const mockInsights = [
-  'Better recent form - Won 4 of last 5 matches',
-  'Strong batting lineup with in-form openers',
-  'Historical advantage at this venue'
-];
 
 const PredictionPage = () => {
   const { id } = useParams();
-  const [match, setMatch] = useState(mockMatch);
+  const [match, setMatch] = useState({
+    team1: '',
+    team2: '',
+    team1Logo: '🏏',
+    team2Logo: '🏏',
+    venue: ''
+  });
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showResult, setShowResult] = useState(false);
-  const [probabilities, setProbabilities] = useState(mockProbabilities);
-  const [insights] = useState(mockInsights);
+  const [probabilities, setProbabilities] = useState({ team1: 50, team2: 50 });
+  const [insights] = useState([
+    'Better recent form - Won 4 of last 5 matches',
+    'Strong batting lineup with in-form openers',
+    'Historical advantage at this venue'
+  ]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In real app, fetch match and probability data from API
+    const fetchMatchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/matches/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          const team1Name = data.homeTeamName || data.homeTeamShortName || 'Team 1';
+          const team2Name = data.awayTeamName || data.awayTeamShortName || 'Team 2';
+          const team1Logo = teamLogos[data.homeTeamName] || data.homeTeamShortName || '🏏';
+          const team2Logo = teamLogos[data.awayTeamName] || data.awayTeamShortName || '🏏';
+          setMatch({ 
+            team1: team1Name,
+            team2: team2Name,
+            team1Logo: team1Logo, 
+            team2Logo: team2Logo,
+            venue: data.venue || 'TBD'
+          });
+          
+          const team1Prob = Math.floor(Math.random() * 40) + 30;
+          const team2Prob = 100 - team1Prob;
+          setProbabilities({ team1: team1Prob, team2: team2Prob });
+        }
+      } catch (err) {
+        console.error('Error fetching match:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMatchData();
   }, [id]);
 
   const handleTeamSelect = (team) => {
@@ -43,17 +72,33 @@ const PredictionPage = () => {
     setShowResult(true);
   };
 
+  const handleSwitchTeam = () => {
+    if (selectedTeam === match.team1) {
+      setSelectedTeam(match.team2);
+    } else {
+      setSelectedTeam(match.team1);
+    }
+  };
+
   const getSelectedPercentage = () => {
-    if (!selectedTeam) return 0;
+    if (!selectedTeam || !match) return 0;
     return selectedTeam === match.team1 ? probabilities.team1 : probabilities.team2;
   };
+
+  if (loading) {
+    return (
+      <div className="prediction-page">
+        <Navbar />
+        <div className="loading">Loading match data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="prediction-page">
       <Navbar />
       
       <div className="prediction-container">
-        {/* Header */}
         <div className="prediction-header">
           <Link to={`/match/${id}`} className="back-btn">
             ← Back to Match Details
@@ -61,7 +106,6 @@ const PredictionPage = () => {
           <h1 className="page-title">Predict the Winner 🏆</h1>
         </div>
         
-        {/* Match Display */}
         <div className="match-display">
           <div className="match-teams">
             <div className="team">
@@ -84,7 +128,6 @@ const PredictionPage = () => {
           </div>
         </div>
         
-        {/* Team Selection */}
         <div className="selection-section">
           <h2 className="selection-title">Select Winner:</h2>
           
@@ -92,7 +135,6 @@ const PredictionPage = () => {
             <button 
               className={`team-select-btn team1 ${selectedTeam === match.team1 ? 'selected' : ''}`}
               onClick={() => handleTeamSelect(match.team1)}
-              disabled={showResult}
             >
               <span className="btn-logo">{match.team1Logo}</span>
               <span className="btn-name">{match.team1}</span>
@@ -101,15 +143,19 @@ const PredictionPage = () => {
             <button 
               className={`team-select-btn team2 ${selectedTeam === match.team2 ? 'selected' : ''}`}
               onClick={() => handleTeamSelect(match.team2)}
-              disabled={showResult}
             >
               <span className="btn-logo">{match.team2Logo}</span>
               <span className="btn-name">{match.team2}</span>
             </button>
           </div>
+          
+          {showResult && (
+            <button className="switch-team-btn" onClick={handleSwitchTeam}>
+              🔄 Switch to {selectedTeam === match.team1 ? match.team2 : match.team1}
+            </button>
+          )}
         </div>
         
-        {/* Results Section */}
         {showResult && (
           <div className="result-section">
             <div className="winning-probability">
@@ -162,7 +208,6 @@ const PredictionPage = () => {
           </div>
         )}
         
-        {/* Win Confidence Meter */}
         {showResult && (
           <div className="confidence-section">
             <h3>⚡ Win Confidence Meter</h3>

@@ -35,4 +35,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     
     @Query("SELECT COUNT(m) FROM Match m WHERE m.matchStatus = :status")
     Long countByMatchStatus(String status);
+    
+    @Query("SELECT m FROM Match m WHERE m.matchStatus = 'COMPLETED' AND ((m.homeTeam.id = :team1Id AND m.awayTeam.id = :team2Id) OR (m.homeTeam.id = :team2Id AND m.awayTeam.id = :team1Id)) ORDER BY m.matchDate DESC")
+    List<Match> findHeadToHeadMatches(Long team1Id, Long team2Id);
 }

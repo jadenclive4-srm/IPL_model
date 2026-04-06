@@ -34,5 +34,12 @@ public class IplPredictorApplication implements CommandLineRunner {
         } catch (Exception e) {
             System.err.println("Failed to import matches from Excel: " + e.getMessage());
         }
+        
+        try {
+            int h2hCount = matchService.importH2hStatsFromClasspath("/data/h2h_stats.csv");
+            System.out.println(h2hCount + " head-to-head stats imported successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to import h2h stats: " + e.getMessage());
+        }
     }
 }

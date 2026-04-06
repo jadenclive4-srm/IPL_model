@@ -26,7 +26,7 @@ const MatchCard = ({
   };
 
   return (
-    <div className={`match-card ${isToday ? 'today-match' : ''}`}>
+    <div className={`match-card ${isToday ? 'today-match' : 'upcoming-match'}`}>
       <div className="match-header">
         <span className="match-date">{formatDate(match.date)}</span>
         <span className="match-status">{getMatchStatus()}</span>

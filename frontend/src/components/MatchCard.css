@@ -18,6 +18,17 @@
   background: linear-gradient(145deg, #1a2d52 0%, #0f2240 100%);
 }
 
+.match-card.upcoming-match {
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(145deg, #1a2d52 0%, #0A1F44 100%);
+}
+
+.match-card.upcoming-match:hover {
+  transform: translateY(-5px);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+}
+
 .match-header {
   display: flex;
   justify-content: space-between;

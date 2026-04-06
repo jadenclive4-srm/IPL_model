@@ -27,4 +27,6 @@ public class MatchDTO {
     private String result;
     private Integer homeWinProbability;
     private Integer awayWinProbability;
+    private Long homeTeamId;
+    private Long awayTeamId;
 }

@@ -1,5 +1,6 @@
 package com.ipl.controller;
 
+import com.ipl.dto.HeadToHead;
 import com.ipl.dto.MatchDTO;
 import com.ipl.model.Match;
 import com.ipl.model.Team;
@@ -8,6 +9,7 @@ import com.ipl.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,26 @@ public class MatchController {
         }
     }
     
+    @PostMapping("/import/excel")
+    public ResponseEntity<String> importMatchesFromExcel(@RequestParam("file") MultipartFile file) {
+        try {
+            int count = matchService.importMatchesFromExcelFile(file.getInputStream());
+            return ResponseEntity.ok(count + " matches imported successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to import matches: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/import/h2h")
+    public ResponseEntity<String> importH2hStats() {
+        try {
+            int count = matchService.importH2hStatsFromClasspath("data/h2h_stats.csv");
+            return ResponseEntity.ok(count + " h2h stats imported successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to import h2h stats: " + e.getMessage());
+        }
+    }
+    
     @GetMapping("/completed")
     public ResponseEntity<List<MatchDTO>> getCompletedMatches() {
         List<MatchDTO> matches = matchService.getCompletedMatches().stream()
@@ -107,6 +129,30 @@ public class MatchController {
         return ResponseEntity.ok(matches);
     }
     
+    @GetMapping("/headtohead/{team1Id}/{team2Id}")
+    public ResponseEntity<HeadToHead> getHeadToHeadStats(
+            @PathVariable Long team1Id,
+            @PathVariable Long team2Id) {
+        HeadToHead stats = matchService.getHeadToHeadStats(team1Id, team2Id);
+        return ResponseEntity.ok(stats);
+    }
+    
+    @GetMapping("/h2h")
+    public ResponseEntity<HeadToHead> getH2hByTeamNames(
+            @RequestParam String team1Name,
+            @RequestParam String team2Name) {
+        Long team1Id = getTeamIdByName(team1Name);
+        Long team2Id = getTeamIdByName(team2Name);
+        if (team1Id == null || team2Id == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        HeadToHead stats = matchService.getHeadToHeadFromDb(team1Id, team2Id);
+        if (stats == null) {
+            stats = matchService.getHeadToHeadStats(team1Id, team2Id);
+        }
+        return ResponseEntity.ok(stats);
+    }
+    
     private Long getTeamIdByName(String teamName) {
         return teamService.getTeamByName(teamName)
                 .map(Team::getId)
@@ -137,6 +183,8 @@ public class MatchController {
         
         dto.setHomeWinProbability(match.getHomeWinProbability());
         dto.setAwayWinProbability(match.getAwayWinProbability());
+        dto.setHomeTeamId(match.getHomeTeam().getId());
+        dto.setAwayTeamId(match.getAwayTeam().getId());
         
         return dto;
     }

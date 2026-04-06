@@ -49,6 +49,8 @@ const Dashboard = () => {
         setLoading(true);
         setError(null);
 
+        let rawTodayData = null;
+
         console.log('Fetching today match...');
         // Fetch today's match
         const todayResponse = await fetch('http://localhost:8080/api/matches/today');
@@ -56,6 +58,7 @@ const Dashboard = () => {
         if (todayResponse.ok) {
           const todayData = await todayResponse.json();
           console.log('Today data:', todayData);
+          rawTodayData = todayData;
           setTodayMatch(transformMatch(todayData));
         } else {
           setTodayMatch(null);
@@ -68,7 +71,11 @@ const Dashboard = () => {
         if (upcomingResponse.ok) {
           const upcomingData = await upcomingResponse.json();
           console.log('Upcoming data:', upcomingData);
-          setUpcomingMatches(upcomingData.map(transformMatch));
+          // Filter out today's match from upcoming matches
+          const filteredMatches = rawTodayData 
+            ? upcomingData.filter(m => m.id !== rawTodayData.id) 
+            : upcomingData;
+          setUpcomingMatches(filteredMatches.map(transformMatch));
         } else {
           setUpcomingMatches([]);
         }
@@ -159,7 +166,7 @@ const Dashboard = () => {
             Upcoming Matches
           </h2>
           <div className="upcoming-matches-grid">
-            {upcomingMatches.map(match => (
+            {upcomingMatches.slice(0, 3).map(match => (
               <MatchCard 
                 key={match.id}
                 match={match}

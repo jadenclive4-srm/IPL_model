@@ -3,6 +3,17 @@
   background: linear-gradient(180deg, #0A1F44 0%, #0f2240 50%, #0A1F44 100%);
 }
 
+.loading, .error {
+  text-align: center;
+  color: #8a9bb8;
+  font-size: 1.2rem;
+  padding: 3rem;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
 .prediction-container {
   max-width: 800px;
   margin: 0 auto;
@@ -57,6 +68,10 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(255, 107, 0, 0.2);
+  border-radius: 12px;
+  min-width: 120px;
 }
 
 .match-teams .team-logo {
@@ -143,6 +158,24 @@
   color: #fff;
   font-weight: 600;
   font-size: 1.1rem;
+}
+
+.switch-team-btn {
+  display: block;
+  margin: 1.5rem auto 0;
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 107, 0, 0.1);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  color: #FF6B00;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.switch-team-btn:hover {
+  background: rgba(255, 107, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 /* Result Section */

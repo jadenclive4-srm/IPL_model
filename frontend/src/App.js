@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import MatchDetails from './pages/MatchDetails';
 import PredictionPage from './pages/PredictionPage';
@@ -15,6 +15,8 @@ function App() {
       <div className="app">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/match" element={<Navigate to="/match/today" replace />} />
+          <Route path="/match/today" element={<TodayMatchRedirect />} />
           <Route path="/match/:id" element={<MatchDetails />} />
           <Route path="/prediction/:id" element={<PredictionPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
@@ -26,5 +28,37 @@ function App() {
     </Router>
   );
 }
+
+const TodayMatchRedirect = () => {
+  const navigate = useNavigate();
+  const [matchId, setMatchId] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    fetch('http://localhost:8080/api/matches/today')
+      .then(res => res.json())
+      .then(data => {
+        setMatchId(data.id);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  React.useEffect(() => {
+    if (!loading && matchId) {
+      navigate(`/match/${matchId}`);
+    } else if (!loading && !matchId) {
+      navigate('/');
+    }
+  }, [loading, matchId, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return null;
+};
 
 export default App;

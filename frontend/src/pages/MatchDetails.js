@@ -5,122 +5,95 @@ import TeamStatsCard from '../components/TeamStatsCard';
 import PlayerCard from '../components/PlayerCard';
 import './MatchDetails.css';
 
-// 5 Questions for the current match
-const mockQuestions = [
-  {
-    id: 1,
-    matchId: 1,
-    questionText: 'Who will win the match?',
-    optionA: 'Mumbai Indians',
-    optionB: 'Chennai Super Kings',
-    optionC: null,
-    optionD: null,
-    correctOption: null,
-    pointsValue: 10,
-    questionType: 'WINNER'
-  },
-  {
-    id: 2,
-    matchId: 1,
-    questionText: 'How many runs will the winning team score?',
-    optionA: 'Below 150',
-    optionB: '150-170',
-    optionC: '170-190',
-    optionD: 'Above 190',
-    correctOption: null,
-    pointsValue: 10,
-    questionType: 'SCORE_RANGE'
-  },
-  {
-    id: 3,
-    matchId: 1,
-    questionText: 'Which player will score the most runs?',
-    optionA: 'Rohit Sharma',
-    optionB: 'Surya Kumar Yadav',
-    optionC: 'MS Dhoni',
-    optionD: 'Ruturaj Gaikwad',
-    correctOption: null,
-    pointsValue: 10,
-    questionType: 'TOP_SCORER'
-  },
-  {
-    id: 4,
-    matchId: 1,
-    questionText: 'How many wickets will fall in the match?',
-    optionA: 'Below 5',
-    optionB: '5-7',
-    optionC: '8-10',
-    optionD: 'Above 10',
-    correctOption: null,
-    pointsValue: 10,
-    questionType: 'WICKETS'
-  },
-  {
-    id: 5,
-    matchId: 1,
-    questionText: 'Which bowler will take the most wickets?',
-    optionA: 'Jasprit Bumrah',
-    optionB: 'Ravindra Jadeja',
-    optionC: 'Other',
-    optionD: 'No wickets',
-    correctOption: null,
-    pointsValue: 10,
-    questionType: 'TOP_BOWLER'
-  }
-];
-
-// Mock data
-const mockMatchDetails = {
-  id: 1,
-  team1: 'Mumbai Indians',
-  team2: 'Chennai Super Kings',
-  team1Logo: '🔵',
-  team2Logo: '🟡',
-  date: new Date().toISOString(),
-  venue: 'Wankhede Stadium, Mumbai',
-  status: 'Upcoming',
-  headToHead: {
-    totalMatches: 36,
-    team1Wins: 20,
-    team2Wins: 16
-  },
-  team1Stats: {
-    wins: 6,
-    losses: 4,
-    recentForm: ['W', 'W', 'L', 'W', 'W']
-  },
-  team2Stats: {
-    wins: 5,
-    losses: 5,
-    recentForm: ['W', 'L', 'W', 'L', 'W']
-  },
-  venueInfo: {
-    totalMatches: 12,
-    team1Wins: 8,
-    team2Wins: 4,
-    avgScore: 165,
-    pitch: 'Batting friendly'
-  },
-  team1Players: [
-    { name: 'Rohit Sharma', role: 'Batsman', isKeyPlayer: true },
-    { name: 'Jasprit Bumrah', role: 'Bowler', isKeyPlayer: true },
-    { name: 'Hardik Pandya', role: 'All-rounder', isKeyPlayer: false }
-  ],
-  team2Players: [
-    { name: 'Ravindra Jadeja', role: 'All-rounder', isKeyPlayer: true },
-    { name: 'Ruturaj Gaikwad', role: 'Batsman', isKeyPlayer: true },
-    { name: 'Deepak Chahar', role: 'Bowler', isKeyPlayer: false }
-  ]
+const teamLogos = {
+  'Royal Challengers Bangalore': '🔴',
+  'Sunrisers Hyderabad': '🟠',
+  'Mumbai Indians': '🔵',
+  'Kolkata Knight Riders': '🟣',
+  'Rajasthan Royals': '🟡',
+  'Chennai Super Kings': '🟡',
+  'Punjab Kings': '🟠',
+  'Gujarat Titans': '🔵',
+  'Lucknow Super Giants': '🟢',
+  'Delhi Capitals': '🔵'
 };
 
 const MatchDetails = () => {
   const { id } = useParams();
-  const [match] = useState(mockMatchDetails);
+  const [match, setMatch] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [activeTab, setActiveTab] = useState('headtohead');
-  const [questions] = useState(mockQuestions);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const userId = localStorage.getItem('userId') || '1';
+
+        const matchResponse = await fetch(`http://localhost:8080/api/matches/${id}`);
+        if (!matchResponse.ok) {
+          throw new Error('Match not found');
+        }
+        const matchData = await matchResponse.json();
+
+        const questionsResponse = await fetch(`http://localhost:8080/api/questions/match/${id}?userId=${userId}`);
+        if (questionsResponse.ok) {
+          const questionsData = await questionsResponse.json();
+          setQuestions(questionsData);
+        }
+
+        const h2hResponse = await fetch(`http://localhost:8080/api/matches/h2h?team1Name=${encodeURIComponent(matchData.homeTeamName)}&team2Name=${encodeURIComponent(matchData.awayTeamName)}`);
+        let headToHeadData = { totalMatches: 0, team1Wins: 0, team2Wins: 0 };
+        if (h2hResponse.ok) {
+          const h2hData = await h2hResponse.json();
+          headToHeadData = h2hData;
+        }
+
+        const transformedMatch = {
+          id: matchData.id,
+          team1: matchData.homeTeamName,
+          team2: matchData.awayTeamName,
+          team1Logo: teamLogos[matchData.homeTeamName] || '🇮🇳',
+          team2Logo: teamLogos[matchData.awayTeamName] || '🇮🇳',
+          date: matchData.matchDate,
+          venue: matchData.venue,
+          status: matchData.matchStatus,
+          winner: matchData.winnerTeamName,
+          homeWinProbability: matchData.homeWinProbability,
+          awayWinProbability: matchData.awayWinProbability,
+          headToHead: headToHeadData,
+          team1Stats: { wins: 6, losses: 4, recentForm: ['W', 'W', 'L', 'W', 'W'] },
+          team2Stats: { wins: 5, losses: 5, recentForm: ['W', 'L', 'W', 'L', 'W'] },
+          venueInfo: { totalMatches: 12, team1Wins: 8, team2Wins: 4, avgScore: 165, pitch: 'Batting friendly' },
+          team1Players: [
+            { name: 'Rohit Sharma', role: 'Batsman', isKeyPlayer: true },
+            { name: 'Jasprit Bumrah', role: 'Bowler', isKeyPlayer: true },
+            { name: 'Hardik Pandya', role: 'All-rounder', isKeyPlayer: false }
+          ],
+          team2Players: [
+            { name: 'Ravindra Jadeja', role: 'All-rounder', isKeyPlayer: true },
+            { name: 'Ruturaj Gaikwad', role: 'Batsman', isKeyPlayer: true },
+            { name: 'Deepak Chahar', role: 'Bowler', isKeyPlayer: false }
+          ]
+        };
+
+        setMatch(transformedMatch);
+      } catch (err) {
+        setError(err.message || 'Failed to load match data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const handleAnswerSelect = (questionId, answer) => {
     setSelectedAnswers(prev => ({
@@ -130,7 +103,7 @@ const MatchDetails = () => {
   };
 
   const handleSubmit = async () => {
-    const unanswered = questions.filter(q => !selectedAnswers[q.id]);
+    const unanswered = questions.filter(q => !selectedAnswers[q.id] && !q.hasAnswered);
     if (unanswered.length > 0) {
       setSubmitMessage('Please answer all questions before submitting.');
       return;
@@ -139,16 +112,22 @@ const MatchDetails = () => {
     setIsSubmitting(true);
     setSubmitMessage('');
 
-    // Prepare the data to send
-    const userId = localStorage.getItem('userId') || '1'; // Default to user ID 1 for guest
-    const answersData = questions.map(question => ({
-      questionId: question.id,
-      selectedOption: selectedAnswers[question.id],
-      answeredAt: Date.now()
-    }));
+    const userId = localStorage.getItem('userId') || '1';
+    const answersToSubmit = questions
+      .filter(q => selectedAnswers[q.id] && !q.hasAnswered)
+      .map(question => ({
+        questionId: question.id,
+        selectedOption: selectedAnswers[question.id],
+        answeredAt: Date.now()
+      }));
+
+    if (answersToSubmit.length === 0) {
+      setSubmitMessage('You have already answered all questions!');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-      // Send to Java backend API
       const response = await fetch('http://localhost:8080/api/questions/answers/batch', {
         method: 'POST',
         headers: {
@@ -157,8 +136,8 @@ const MatchDetails = () => {
         body: JSON.stringify({
           userId: parseInt(userId),
           matchId: parseInt(id),
-          answers: answersData.map(a => a.selectedOption),
-          questionIds: answersData.map(a => a.questionId)
+          answers: answersToSubmit.map(a => a.selectedOption),
+          questionIds: answersToSubmit.map(a => a.questionId)
         })
       });
 
@@ -176,10 +155,28 @@ const MatchDetails = () => {
     }
   };
 
-  useEffect(() => {
-    // In real app, fetch match details from API
-    // For now using mock data
-  }, [id]);
+  if (loading) {
+    return (
+      <div className="match-details-page">
+        <Navbar />
+        <div className="match-details-container">
+          <div className="loading">Loading match data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !match) {
+    return (
+      <div className="match-details-page">
+        <Navbar />
+        <div className="match-details-container">
+          <Link to="/" className="back-btn">← Back to Dashboard</Link>
+          <div className="error">{error || 'Match not found'}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="match-details-page">
@@ -314,12 +311,6 @@ const MatchDetails = () => {
           >
             Venue Stats
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'players' ? 'active' : ''}`}
-            onClick={() => setActiveTab('players')}
-          >
-            Key Players
-          </button>
         </div>
         
         {/* Tab Content */}
@@ -391,29 +382,6 @@ const MatchDetails = () => {
                   <div className="venue-win team2">
                     <span>{match.team2}</span>
                     <span className="win-count">{match.venueInfo.team2Wins} wins</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {activeTab === 'players' && (
-            <div className="players-section">
-              <div className="players-grid">
-                <div className="team-players">
-                  <h3>{match.team1} Players</h3>
-                  <div className="player-list">
-                    {match.team1Players.map((player, index) => (
-                      <PlayerCard key={index} player={player} />
-                    ))}
-                  </div>
-                </div>
-                <div className="team-players">
-                  <h3>{match.team2} Players</h3>
-                  <div className="player-list">
-                    {match.team2Players.map((player, index) => (
-                      <PlayerCard key={index} player={player} />
-                    ))}
                   </div>
                 </div>
               </div>
