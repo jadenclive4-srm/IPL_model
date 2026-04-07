@@ -87,6 +87,10 @@
   .bonus-text h3 {
     font-size: 1.2rem;
   }
+
+  .venue-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Match Questions Section */
@@ -361,7 +365,7 @@
 
 .venue-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -383,13 +387,12 @@
 
 .venue-label {
   color: #8a9bb8;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
 }
 
 .venue-wins {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  display: none;
 }
 
 .venue-win {
@@ -501,7 +504,7 @@
   }
   
   .venue-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

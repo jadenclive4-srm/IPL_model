@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import Papa from 'papaparse';
 import Navbar from '../components/Navbar';
 import TeamStatsCard from '../components/TeamStatsCard';
 import PlayerCard from '../components/PlayerCard';
+import VenueStats from '../components/VenueStats';
 import './MatchDetails.css';
 
 const teamLogos = {
@@ -28,6 +30,7 @@ const MatchDetails = () => {
   const [submitMessage, setSubmitMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [venueStatsCsv, setVenueStatsCsv] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,11 +98,65 @@ const MatchDetails = () => {
     fetchData();
   }, [id]);
 
+  useEffect(() => {
+    const fetchVenueStatsCsv = async () => {
+      try {
+        const response = await fetch('/venue_stats.csv');
+        if (!response.ok) {
+          throw new Error('Could not load venue stats CSV');
+        }
+
+        const csvText = await response.text();
+        const parsed = Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true
+        });
+
+        const rows = parsed.data.map((row) => ({
+          stadium: row['Stadium']?.trim(),
+          city: row['City']?.trim(),
+          totalMatches: row['Total Matches']?.trim(),
+          firstInningsAverage: row['First Innings Average']?.trim(),
+          secondInningsAverage: row['Second Innings Average']?.trim(),
+          winsBattingFirst: row['Wins Batting First']?.trim(),
+          winsBattingSecond: row['Wins Batting Second']?.trim(),
+          noResult: row['No Result']?.trim()
+        }));
+
+        setVenueStatsCsv(rows);
+      } catch (err) {
+        console.error('Venue CSV load error:', err);
+      }
+    };
+
+    fetchVenueStatsCsv();
+  }, []);
+
   const handleAnswerSelect = (questionId, answer) => {
     setSelectedAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
+  };
+
+  const findVenueCsvStats = (venueName) => {
+    if (!venueName || venueStatsCsv.length === 0) return null;
+
+    const normalizedVenue = venueName.toLowerCase();
+
+    return venueStatsCsv.find((venue) => {
+      const stadium = venue.stadium?.toLowerCase() || '';
+      const city = venue.city?.toLowerCase() || '';
+
+      return (
+        stadium === normalizedVenue ||
+        normalizedVenue.includes(stadium) ||
+        stadium.includes(normalizedVenue) ||
+        city === normalizedVenue ||
+        normalizedVenue.includes(city) ||
+        city.includes(normalizedVenue)
+      );
+    });
   };
 
   const handleSubmit = async () => {
@@ -177,6 +234,20 @@ const MatchDetails = () => {
       </div>
     );
   }
+
+  const matchedVenueCsv = findVenueCsvStats(match.venue);
+  const venueInfo = {
+    ...match.venueInfo,
+    ...(matchedVenueCsv ? {
+      totalMatches: matchedVenueCsv.totalMatches,
+      firstInningsAverage: matchedVenueCsv.firstInningsAverage,
+      secondInningsAverage: matchedVenueCsv.secondInningsAverage,
+      winsBattingFirst: matchedVenueCsv.winsBattingFirst,
+      winsBattingSecond: matchedVenueCsv.winsBattingSecond,
+      noResult: matchedVenueCsv.noResult,
+      city: matchedVenueCsv.city
+    } : {})
+  };
 
   return (
     <div className="match-details-page">
@@ -357,35 +428,10 @@ const MatchDetails = () => {
           )}
           
           {activeTab === 'venue' && (
-            <div className="venue-section">
-              <div className="venue-card">
-                <h3>📍 Venue Stats: {match.venue}</h3>
-                <div className="venue-grid">
-                  <div className="venue-stat">
-                    <span className="venue-value">{match.venueInfo.totalMatches}</span>
-                    <span className="venue-label">Matches Played</span>
-                  </div>
-                  <div className="venue-stat">
-                    <span className="venue-value">{match.venueInfo.avgScore}</span>
-                    <span className="venue-label">Avg Score</span>
-                  </div>
-                  <div className="venue-stat">
-                    <span className="venue-value">{match.venueInfo.pitch}</span>
-                    <span className="venue-label">Pitch Type</span>
-                  </div>
-                </div>
-                <div className="venue-wins">
-                  <div className="venue-win team1">
-                    <span>{match.team1}</span>
-                    <span className="win-count">{match.venueInfo.team1Wins} wins</span>
-                  </div>
-                  <div className="venue-win team2">
-                    <span>{match.team2}</span>
-                    <span className="win-count">{match.venueInfo.team2Wins} wins</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <VenueStats
+              venueName={match.venue}
+              venueInfo={venueInfo}
+            />
           )}
         </div>
         
